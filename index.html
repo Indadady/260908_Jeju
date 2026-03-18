@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[한국세무금융고] 제주 3박 4일 문화탐방 - 스마트 가이드</title>
+    <title>[황지정보산업고] 제주 3박 4일 문화탐방 - 스마트 가이드</title>
     
     <!-- Google tag (gtag.js) - 구글 애널리틱스 추적 코드 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JLH9GD9SVR"></script>
@@ -15,8 +15,8 @@
     </script>
 
     <!-- SEO & Open Graph (카톡 전송용 썸네일) -->
-    <meta name="description" content="한국세무금융고등학교 학생들을 위한 짜릿하고 감성 넘치는 제주도 3박 4일 탐방 가이드북">
-    <meta property="og:title" content="🌴 [한국세무금융고] 제주 문화탐방 가이드북">
+    <meta name="description" content="황지정보산업고등학교 학생들을 위한 짜릿하고 감성 넘치는 제주도 3박 4일 탐방 가이드북">
+    <meta property="og:title" content="🌴 [황지정보산업고] 제주 문화탐방 가이드북">
     <meta property="og:image" content="https://tse4.mm.bing.net/th/id/OIP.kd7XQGSl28a_c-Xr6PxzXwHaLH?w=474&h=474&c=7&p=0">
 
     <!-- Tailwind CSS -->
@@ -116,7 +116,7 @@
     <!-- Hero -->
     <section id="home" class="hero-bg min-h-[60vh] flex items-center justify-center text-center px-4">
         <div class="animate-fade-in-up text-white">
-            <span class="bg-indigo-600/90 px-6 py-2 rounded-full text-lg md:text-xl font-bold mb-6 inline-block border border-white/20 shadow-lg font-title tracking-wide">🏫 한국세무금융고등학교</span>
+            <span class="bg-indigo-600/90 px-6 py-2 rounded-full text-lg md:text-xl font-bold mb-6 inline-block border border-white/20 shadow-lg font-title tracking-wide">🏫 황지정보산업고등학교</span>
             <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg font-title">트렌디하고 짜릿한<br><span class="text-yellow-400 font-bold">제주 문화탐방 3박 4일</span></h1>
             <p class="text-xl md:text-2xl text-white font-bold tracking-wide mb-2">2026. 09. 08(화) ~ 09. 11(금)</p>
             <p class="text-sm md:text-base text-slate-200 font-medium tracking-wide">액티비티와 감성 스팟이 가득한 제주로 떠납니다!</p>
@@ -570,7 +570,7 @@
     <!-- 인쇄 전용 (A4) 레이아웃 시작 -->
     <div class="hidden print:block bg-white text-black p-4 w-full font-sans" style="max-width: 210mm; margin: 0 auto;">
         <div class="border-b-2 border-black pb-4 mb-6 text-center">
-            <h1 class="text-2xl font-bold text-center mb-2 font-title">[한국세무금융고등학교] 제주 문화탐방 3박 4일 일정표</h1>
+            <h1 class="text-2xl font-bold text-center mb-2 font-title">[황지정보산업고등학교] 제주 문화탐방 3박 4일 일정표</h1>
             <p class="text-center text-sm text-gray-600">※ 본 일정표는 항공 및 현지 사정에 따라 다소 변경될 수 있습니다.</p>
             <p class="text-center text-xs font-bold text-gray-700 mt-2">여행인원: 고등학생 38명 + 교사 5명 (총 43명) | 숙소: 신신호텔 제주오션</p>
         </div>
@@ -674,6 +674,27 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // 커스텀 토스트 알림 함수 (alert 대체)
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl z-[100] text-sm font-bold transition-all duration-300 opacity-0 translate-y-4';
+            document.body.appendChild(toast);
+            
+            // 나타나기
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-4');
+                toast.classList.add('opacity-100', 'translate-y-0');
+            }, 10);
+            
+            // 사라지기
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         function openTab(evt, tabId){
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -688,14 +709,14 @@
         function shareLink(){
             const url = window.location.href;
             if (navigator.share) {
-                navigator.share({ title: '[한국세무금융고] 제주 3박 4일 문화탐방', url }).catch(()=>{});
+                navigator.share({ title: '[황지정보산업고] 제주 3박 4일 문화탐방', url }).catch(()=>{});
             } else {
-                navigator.clipboard?.writeText(url).then(()=>alert('링크가 복사되었습니다. 카카오톡에 붙여넣기 해주세요.'));
+                navigator.clipboard?.writeText(url).then(()=>showToast('링크가 복사되었습니다. 카카오톡에 붙여넣기 해주세요.'));
             }
         }
 
         // Checklist Logic (고등학생 맞춤)
-        const CHECK_KEY = 'taxfin_jeju_checklist'; 
+        const CHECK_KEY = 'hwangji_jeju_checklist'; 
         const CHECK_ITEMS = [
             '★신분증★ (주민등록증, 여권, 학생증 등 원본 필수!)',
             '단정한 사복 및 여벌 옷 (사진 촬영용 코디)',
@@ -715,7 +736,7 @@
             const saved = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
 
             container.innerHTML = CHECK_ITEMS.map((label, idx) => {
-                const id = `chk_tf_${idx}`;
+                const id = `chk_hj_${idx}`;
                 const checked = saved[id] ? 'checked' : '';
                 const isImportant = label.includes('★신분증★') || label.includes('보조배터리');
                 const labelClass = isImportant ? 'text-sm font-bold text-red-600' : 'text-sm text-slate-700';
@@ -750,14 +771,14 @@
         (function(){
             const memo = document.getElementById('travel-memo');
             if(!memo) return;
-            const KEY = 'taxfin_jeju_memo';
+            const KEY = 'hwangji_jeju_memo';
             memo.value = localStorage.getItem(KEY) || '';
             memo.addEventListener('input', () => {
                 localStorage.setItem(KEY, memo.value);
             });
         })();
 
-        // Map Logic (한국세무금융고 실제 동선 반영)
+        // Map Logic (황지정보산업고 실제 동선 반영)
         let mapInited = false;
         let dayLayers = {};
         let currentMap = null;
