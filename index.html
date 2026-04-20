@@ -15,7 +15,7 @@
     </script>
 
     <!-- SEO & Open Graph (카톡 전송용 썸네일) -->
-    <meta name="description" content="황지정보산업고등학교 학생들을 위한 짜릿하고 감성 넘치는 제주도 3박 4일 탐방 가이드북">
+    <meta name="description" content="황지정보산업고등학교 제주도 3박 4일 문화탐방 가이드북">
     <meta property="og:title" content="🌴 [황지정보산업고] 제주 문화탐방 가이드북">
     <meta property="og:image" content="https://tse4.mm.bing.net/th/id/OIP.kd7XQGSl28a_c-Xr6PxzXwHaLH?w=474&h=474&c=7&p=0">
 
@@ -201,7 +201,7 @@
                 <div class="bg-white rounded-2xl border border-indigo-100 shadow-lg overflow-hidden">
                     <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex flex-wrap justify-between items-center gap-2">
                         <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2 font-title">
-                            <i class="fa-solid fa-shield-halved text-indigo-500"></i> 탑승 수속 및 안전 수칙 (고등학생 필독)
+                            <i class="fa-solid fa-shield-halved text-indigo-500"></i> 탑승 수속 및 안전 수칙 (필독)
                         </h3>
                         <span class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">집결: 원주공항</span>
                     </div>
@@ -210,7 +210,7 @@
                         <div class="bg-red-50 rounded-xl p-4 mb-6 border border-red-100">
                             <h4 class="font-bold text-red-700 mb-2 flex items-center gap-2"><i class="fa-solid fa-id-card"></i> [매우 중요] 신분증 지참 필수!</h4>
                             <p class="text-sm text-red-600 leading-relaxed font-medium">
-                                고등학생(만 16세 이상)은 항공기 탑승을 위해 <strong>주민등록증, 여권, 또는 학생증(사진과 생년월일 포함)</strong> 중 하나를 무조건 원본으로 지참해야 합니다. 신분증 미지참 시 비행기 탑승이 절대 불가합니다.
+                                국내선 항공기 탑승을 위해 <strong>주민등록증, 여권, 또는 학생증(사진과 생년월일 포함)</strong> 중 하나를 무조건 원본으로 지참해야 합니다. 신분증 미지참 시 비행기 탑승이 절대 불가합니다.
                             </p>
                         </div>
 
@@ -443,12 +443,12 @@
                             </div>
                             <div class="relative pl-8 border-l-2 border-indigo-200">
                                 <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-slate-800"></div>
-                                <h4 class="font-bold text-lg">14:00 제주공항 도착 및 수속 (오메기떡 수령)</h4>
+                                <h4 class="font-bold text-lg">14:00 제주공항 도착 및 탑승 수속</h4>
                             </div>
                             <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 mt-8 text-center shadow-sm">
                                 <p class="text-sm font-bold text-slate-800">✈️ 15:20 제주 출발 (진에어)</p>
                                 <p class="text-sm mt-2 font-bold text-slate-800">🛬 16:35 원주공항 도착</p>
-                                <p class="text-sm mt-2 font-bold text-slate-800">🏫 <strong>학교로 이동 및 해산</strong></p>
+                                <p class="text-sm mt-2 font-bold text-slate-800">🏫 <strong>도착 및 해산</strong></p>
                             </div>
                         </div>
                     </div>
@@ -701,9 +701,9 @@
                         <ul class="space-y-1.5 text-left ml-1">
                             <li class="bullet"><strong class="text-gray-900 text-[13px]">노형수퍼마켙:</strong> 압도적 스케일의 화려한 미디어아트 전시 관람</li>
                             <li class="bullet"><strong class="text-gray-900 text-[13px]">이호테우 & 해안도로:</strong> 조랑말 등대와 알록달록 해안도로</li>
-                            <li class="bullet"><strong class="text-gray-900 hl text-[13px]">제주공항 수속:</strong> 오메기떡 수령 및 탑승 수속</li>
+                            <li class="bullet"><strong class="text-gray-900 hl text-[13px]">제주공항 수속:</strong> 탑승 수속 및 인원 파악</li>
                             <li class="bullet text-[13px]"><span class="font-bold">[항공]</span> 15:20 제주 출발 → 16:35 원주 도착 (진에어)</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">학교 복귀:</strong> 버스 이동 후 해산</li>
+                            <li class="bullet"><strong class="text-gray-900 text-[13px]">도착 및 해산:</strong> 버스 이동 후 안전하게 해산</li>
                         </ul>
                     </td>
                     <td class="col-meal">
@@ -762,7 +762,7 @@
             }
         }
 
-        // Checklist Logic (고등학생 맞춤) 복원
+        // Checklist Logic (학생 맞춤으로 내용 수정)
         const CHECK_KEY = 'hwangji_jeju_checklist'; 
         const CHECK_ITEMS = [
             '★신분증★ (주민등록증, 여권, 학생증 등 원본 필수!)',
@@ -812,7 +812,7 @@
         }
         renderChecklist();
 
-        // Memo Logic 복원
+        // Memo Logic
         (function(){
             const memo = document.getElementById('travel-memo');
             if(!memo) return;
@@ -857,7 +857,7 @@
 
         // ESG Dashboard Calculator
         (function initESG() {
-            const people = 45; // 학생 39 + 교사 6
+            const people = 45; // 학생 39명 + 교사 6명
             const paperEl = document.getElementById('esg-paper');
             const carbonEl = document.getElementById('esg-carbon');
             const waterEl = document.getElementById('esg-water');
@@ -938,7 +938,7 @@
             if(mapInited || !window.L) return;
             mapInited = true;
             
-            // 제주도 주요 스팟 좌표 (3일차 수정 반영)
+            // 제주도 주요 스팟 좌표
             const spots = {
                 jejuAirport: [33.5104, 126.4913],
                 park981: [33.3642, 126.3456],
@@ -947,11 +947,11 @@
                 songdang: [33.4447, 126.7877],
                 saryeoni: [33.4077, 126.6437],
                 ecoland: [33.4560, 126.6678],
-                osulloc: [33.3059, 126.2895],    // 3일차 1
-                sanbang: [33.2384, 126.3115],    // 3일차 2 (산방산 랜드 주변)
-                beophwan: [33.2372, 126.5165],   // 3일차 3 (법환)
-                camellia: [33.2897, 126.3533],   // 3일차 4
-                cheonjiyeon: [33.2447, 126.5546],// 3일차 5
+                osulloc: [33.3059, 126.2895],
+                sanbang: [33.2384, 126.3115],    // 산방산 랜드 주변
+                beophwan: [33.2372, 126.5165],   // 법환
+                camellia: [33.2897, 126.3533],
+                cheonjiyeon: [33.2447, 126.5546],
                 nohyeong: [33.4735, 126.4716],
                 iho: [33.4984, 126.4526]
             };
@@ -1043,7 +1043,6 @@
                 let daySpots = [];
                 if(day === 'day1') daySpots = [allSpots.jejuAirport, allSpots.park981, allSpots.hotel];
                 if(day === 'day2') daySpots = [allSpots.hotel, allSpots.hamdeok, allSpots.songdang, allSpots.saryeoni, allSpots.ecoland];
-                // 3일차 수정 반영
                 if(day === 'day3') daySpots = [allSpots.hotel, allSpots.osulloc, allSpots.sanbang, allSpots.beophwan, allSpots.camellia, allSpots.cheonjiyeon];
                 if(day === 'day4') daySpots = [allSpots.hotel, allSpots.nohyeong, allSpots.iho, allSpots.jejuAirport];
                 
