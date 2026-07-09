@@ -55,9 +55,23 @@
         .custom-marker { transition: transform 0.2s; }
         .custom-marker:hover { transform: scale(1.1); z-index: 1000 !important; }
 
-        /* 가로 스크롤 날씨 위젯용 */
-        .weather-scroll { scroll-snap-type: x mandatory; }
-        .weather-card { scroll-snap-align: start; }
+        /* 날씨 카드 — 모바일 5일 균등 배치 */
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.375rem;
+        }
+        @media (min-width: 640px) {
+            .weather-grid { gap: 0.75rem; }
+        }
+        .weather-card {
+            min-width: 0;
+            word-break: keep-all;
+        }
+        .esg-stat-label {
+            line-height: 1.25;
+            word-break: keep-all;
+        }
 
         /* 인쇄 전용 CSS (결재 서류 양식 최적화) */
         @media print {
@@ -566,47 +580,53 @@
         </div>
     </section>
 
-    <!-- Weather & ESG Section (Moved to Bottom) -->
-    <section id="weather-esg" class="py-16 bg-slate-50 border-t border-slate-200">
+    <!-- Weather & ESG Section -->
+    <section id="weather-esg" class="py-12 sm:py-16 bg-slate-50 border-t border-slate-200">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-10">
-                <h2 class="text-2xl font-bold text-slate-800 font-title">🌦️ 날씨 정보 및 🌍 ESG 실천</h2>
-                <p class="text-sm text-slate-500 mt-1">현지 기후에 대비하고, 스마트 가이드북을 통한 친환경 실천을 확인하세요.</p>
+            <div class="text-center mb-8 sm:mb-10">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 font-title">날씨 정보 · ESG 실천</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1 px-2">현지 기후에 대비하고, 스마트 가이드북을 통한 친환경 실천을 확인하세요.</p>
             </div>
-            <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-5 sm:gap-8 max-w-6xl mx-auto">
                 <!-- Weather Widget -->
-                <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 shadow-sm">
-                    <h3 class="font-bold text-blue-900 mb-4 flex items-center gap-2"><i class="fa-solid fa-cloud-sun text-blue-500"></i> 제주특별자치도 7일 날씨 예보</h3>
-                    <div id="weather-container" class="flex overflow-x-auto weather-scroll gap-3 pb-2 no-scrollbar">
-                        <div class="text-sm text-slate-500 py-4">날씨 정보를 불러오는 중입니다...</div>
+                <div class="bg-blue-50/50 p-4 sm:p-6 rounded-2xl border border-blue-100 shadow-sm">
+                    <h3 class="font-bold text-blue-900 text-sm sm:text-base mb-3 sm:mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-sun text-blue-500 shrink-0"></i>
+                        <span>제주 5일 날씨 예보</span>
+                    </h3>
+                    <div id="weather-container" class="weather-grid">
+                        <div class="text-sm text-slate-500 py-4 col-span-5 text-center">날씨 정보를 불러오는 중입니다...</div>
                     </div>
-                    <div class="mt-4 bg-white p-3 rounded-lg border border-blue-100 text-sm text-slate-600 font-medium flex gap-2 items-start">
-                        <i class="fa-solid fa-shirt text-blue-500 mt-1"></i>
-                        <p>제주는 바람이 많이 불고 일교차가 있을 수 있습니다. 활동하기 편한 긴팔과 반팔을 혼합해 겹쳐 입기 좋은 <strong>가디건이나 바람막이</strong>를 반드시 준비해 주세요.</p>
+                    <div class="mt-3 sm:mt-4 bg-white p-3 rounded-lg border border-blue-100 text-xs sm:text-sm text-slate-600 font-medium flex gap-2 items-start">
+                        <i class="fa-solid fa-shirt text-blue-500 mt-0.5 shrink-0"></i>
+                        <p class="leading-relaxed">제주는 바람이 많고 일교차가 큽니다. <strong>가디건·바람막이</strong>로 겹쳐 입을 준비를 해주세요.</p>
                     </div>
                 </div>
 
                 <!-- ESG Dashboard -->
-                <div class="bg-green-50/50 p-6 rounded-2xl border border-green-100 shadow-sm">
-                    <h3 class="font-bold text-green-900 mb-4 flex items-center gap-2"><i class="fa-solid fa-leaf text-green-500"></i> 스마트 가이드북 ESG 실천 대시보드</h3>
-                    <div class="grid grid-cols-3 gap-2 text-center mb-4">
-                        <div class="bg-white p-3 rounded-xl shadow-sm border border-green-100">
-                            <i class="fa-solid fa-tree text-green-500 text-xl mb-1"></i>
-                            <p class="text-[11px] text-slate-500 font-bold">종이 절감</p>
-                            <p class="font-black text-green-700 text-lg" id="esg-paper">0장</p>
+                <div class="bg-green-50/50 p-4 sm:p-6 rounded-2xl border border-green-100 shadow-sm">
+                    <h3 class="font-bold text-green-900 text-sm sm:text-base mb-3 sm:mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-leaf text-green-500 shrink-0"></i>
+                        <span>ESG 실천 대시보드</span>
+                    </h3>
+                    <div class="grid grid-cols-3 gap-1.5 sm:gap-3 text-center mb-3 sm:mb-4">
+                        <div class="bg-white p-2.5 sm:p-3 rounded-xl shadow-sm border border-green-100 min-w-0">
+                            <i class="fa-solid fa-tree text-green-500 text-base sm:text-xl mb-1"></i>
+                            <p class="esg-stat-label text-[10px] sm:text-[11px] text-slate-500 font-bold">종이 절감</p>
+                            <p class="font-black text-green-700 text-sm sm:text-lg mt-0.5" id="esg-paper">0장</p>
                         </div>
-                        <div class="bg-white p-3 rounded-xl shadow-sm border border-green-100">
-                            <i class="fa-solid fa-smog text-slate-400 text-xl mb-1"></i>
-                            <p class="text-[11px] text-slate-500 font-bold">탄소 배출 감소</p>
-                            <p class="font-black text-slate-700 text-lg" id="esg-carbon">0g</p>
+                        <div class="bg-white p-2.5 sm:p-3 rounded-xl shadow-sm border border-green-100 min-w-0">
+                            <i class="fa-solid fa-smog text-slate-400 text-base sm:text-xl mb-1"></i>
+                            <p class="esg-stat-label text-[10px] sm:text-[11px] text-slate-500 font-bold">탄소 감소</p>
+                            <p class="font-black text-slate-700 text-sm sm:text-lg mt-0.5" id="esg-carbon">0g</p>
                         </div>
-                        <div class="bg-white p-3 rounded-xl shadow-sm border border-green-100">
-                            <i class="fa-solid fa-droplet text-blue-400 text-xl mb-1"></i>
-                            <p class="text-[11px] text-slate-500 font-bold">물 절약</p>
-                            <p class="font-black text-blue-700 text-lg" id="esg-water">0L</p>
+                        <div class="bg-white p-2.5 sm:p-3 rounded-xl shadow-sm border border-green-100 min-w-0">
+                            <i class="fa-solid fa-droplet text-blue-400 text-base sm:text-xl mb-1"></i>
+                            <p class="esg-stat-label text-[10px] sm:text-[11px] text-slate-500 font-bold">물 절약</p>
+                            <p class="font-black text-blue-700 text-sm sm:text-lg mt-0.5" id="esg-water">0L</p>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-lg border border-green-100" id="esg-desc">
+                    <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-lg border border-green-100" id="esg-desc">
                         계산중...
                     </p>
                 </div>
@@ -875,47 +895,53 @@
             if(descEl) descEl.innerHTML = `본 행사는 스마트 가이드북 도입을 통해 참여 인원 비례 약 <strong>${trees}그루</strong>의 나무를 심는 효과를 거두었으며, 디지털 전환(DX)을 통한 공공부문 에너지 절약 실천의 모범 사례입니다.`;
         })();
 
-        // Weather API (Open-Meteo)
+        // Weather API (Open-Meteo) — 5일 예보, 모바일 균등 그리드
         async function fetchWeather() {
             const container = document.getElementById('weather-container');
             if(!container) return;
 
             try {
-                // 제주 좌표
                 const lat = 33.4996, lon = 126.5312;
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia/Seoul`);
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia/Seoul&forecast_days=5`);
                 const data = await res.json();
-                
+
                 const weatherCodes = {
-                    0: '☀️ 맑음', 1: '🌤️ 대체로 맑음', 2: '⛅ 구름조금', 3: '☁️ 흐림',
-                    45: '🌫️ 안개', 48: '안개', 51: '🌧️ 이슬비', 53: '이슬비', 55: '이슬비',
-                    61: '☔ 비', 63: '비', 65: '비', 71: '❄️ 눈', 73: '눈', 75: '눈',
-                    80: '🌦️ 소나기', 81: '소나기', 82: '소나기', 95: '⛈️ 뇌우', 96: '우박', 99: '우박'
+                    0: ['☀️', '맑음'], 1: ['🌤️', '맑음'], 2: ['⛅', '구름'], 3: ['☁️', '흐림'],
+                    45: ['🌫️', '안개'], 48: ['🌫️', '안개'],
+                    51: ['🌧️', '이슬비'], 53: ['🌧️', '이슬비'], 55: ['🌧️', '이슬비'],
+                    61: ['☔', '비'], 63: ['☔', '비'], 65: ['☔', '비'],
+                    71: ['❄️', '눈'], 73: ['❄️', '눈'], 75: ['❄️', '눈'],
+                    80: ['🌦️', '소나기'], 81: ['🌦️', '소나기'], 82: ['🌦️', '소나기'],
+                    95: ['⛈️', '뇌우'], 96: ['⛈️', '우박'], 99: ['⛈️', '우박']
                 };
 
                 let html = '';
-                for(let i=0; i<7; i++) {
-                    const dateObj = new Date(data.daily.time[i]);
+                const days = Math.min(5, data.daily.time.length);
+                for (let i = 0; i < days; i++) {
+                    const dateObj = new Date(data.daily.time[i] + 'T12:00:00');
                     const dayName = ['일','월','화','수','목','금','토'][dateObj.getDay()];
                     const month = dateObj.getMonth() + 1;
                     const date = dateObj.getDate();
-                    
                     const code = data.daily.weathercode[i];
                     const maxT = Math.round(data.daily.temperature_2m_max[i]);
                     const minT = Math.round(data.daily.temperature_2m_min[i]);
-                    const icon = weatherCodes[code] || '☁️ 흐림';
-                    
+                    const [emoji, label] = weatherCodes[code] || ['☁️', '흐림'];
+
                     html += `
-                    <div class="weather-card flex-shrink-0 bg-white p-3 rounded-xl border border-blue-100 text-center w-24">
-                        <p class="text-xs font-bold text-slate-500 mb-1">${month}/${date} (${dayName})</p>
-                        <div class="text-2xl mb-1">${icon.split(' ')[0]}</div>
-                        <p class="text-xs font-medium text-slate-600">${icon.split(' ')[1]}</p>
-                        <p class="text-[11px] font-bold mt-1"><span class="text-blue-500">${minT}°</span> <span class="text-slate-300">|</span> <span class="text-red-500">${maxT}°</span></p>
+                    <div class="weather-card bg-white px-1 py-2.5 sm:p-3 rounded-xl border border-blue-100 text-center">
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 leading-tight">${month}/${date}<br><span class="font-medium">(${dayName})</span></p>
+                        <div class="text-xl sm:text-2xl my-1 leading-none">${emoji}</div>
+                        <p class="text-[10px] sm:text-xs font-medium text-slate-600 truncate">${label}</p>
+                        <p class="text-[10px] sm:text-[11px] font-bold mt-1 leading-tight">
+                            <span class="text-blue-500">${minT}°</span>
+                            <span class="text-slate-300 mx-0.5">/</span>
+                            <span class="text-red-500">${maxT}°</span>
+                        </p>
                     </div>`;
                 }
                 container.innerHTML = html;
             } catch (e) {
-                container.innerHTML = '<p class="text-sm text-red-500">날씨 정보를 불러오지 못했습니다.</p>';
+                container.innerHTML = '<p class="text-sm text-red-500 col-span-5 text-center">날씨 정보를 불러오지 못했습니다.</p>';
             }
         }
         fetchWeather();
