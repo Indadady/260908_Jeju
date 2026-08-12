@@ -73,27 +73,81 @@
             word-break: keep-all;
         }
 
-        /* 인쇄 전용 CSS (결재 서류 양식 최적화) */
+        /* 인쇄 전용 CSS (투어메이커 표준 A4 일정표 양식) */
         @media print {
-            body { background-color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .print\:hidden { display: none !important; }
-            .print-wrapper { display: block !important; width: 100%; max-width: 210mm; margin: 0 auto; box-sizing: border-box; word-break: keep-all; page-break-after: avoid; }
-            
-            table.print-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 20px; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 6px; font-size: 13px; line-height: 1.4; vertical-align: middle; }
-            .print-table th { background-color: #f1f5f9 !important; font-weight: bold; text-align: center; }
-            
-            /* 비율: 일자 11%, 상세일정 75%, 식사 14% */
-            .col-day { width: 11%; text-align: center; font-weight: bold; }
-            .col-desc { width: 75%; text-align: left; }
-            .col-meal { width: 14%; text-align: center; }
-            
-            .hl { color: #004098 !important; font-weight: bold; }
-            .bullet::before { content: '■ '; color: #000; }
+            @page { size: A4 portrait; margin: 12mm 10mm; }
+            body { background-color: #ffffff !important; font-size: 10pt; color: #1e293b !important; }
+            a[href]:after { content: none !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            .print-hidden, .print\:hidden { display: none !important; }
+            #print-area { display: block !important; width: 100%; color: #1e293b; font-family: 'Noto Sans KR', sans-serif; }
+
+            .print-page-container { width: 100%; margin: 0; padding: 0; }
+
+            .print-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #004098; padding-bottom: 8px; margin-bottom: 15px; }
+            .print-header .logo img { height: 32px; object-fit: contain; }
+            .print-header .doc-info { text-align: right; font-size: 11px; color: #475569; }
+
+            .print-title-section { text-align: center; margin-bottom: 15px; }
+            .print-title-section h1 { font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; margin: 0; }
+
+            .print-overview-slim {
+                display: flex;
+                justify-content: space-between;
+                gap: 8px;
+                background-color: #f8fafc;
+                border: 1px solid #94a3b8;
+                border-radius: 6px;
+                padding: 8px 14px;
+                margin-bottom: 15px;
+                font-size: 12.5px;
+                word-break: keep-all;
+            }
+            .print-overview-item { display: flex; gap: 8px; align-items: flex-start; min-width: 0; }
+            .print-overview-slim .label { font-weight: 700; color: #004098; white-space: nowrap; flex-shrink: 0; }
+            .print-overview-slim .value { line-height: 1.45; }
+            .print-nowrap { white-space: nowrap; }
+
+            /* 열 비율: 일자 11% / 상세일정 75% / 식사 14% */
+            .print-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; table-layout: fixed; border: 2px solid #1e293b; }
+            .print-table th, .print-table td { border: 1px solid #1e293b; padding: 8px 10px; vertical-align: top; page-break-inside: avoid; word-break: keep-all; }
+            .print-table th { background-color: #f8fafc !important; color: #1e293b; font-weight: 700; text-align: center; font-size: 12.5px; border-bottom: 2px solid #1e293b; }
+            .print-table tr { page-break-inside: avoid; }
+
+            .print-col-date { width: 11%; text-align: center; font-weight: 700; vertical-align: middle; background-color: #f8fafc; }
+            .print-col-desc { width: 75%; }
+            .print-col-meal { width: 14%; text-align: center; vertical-align: middle; }
+
+            .print-day-divider td { border-top: 2px solid #1e293b !important; }
+
+            .print-time-flow { margin-bottom: 4px; font-weight: 500; font-size: 12px; }
+            .print-time-tag { display: inline-block; color: #004098; font-weight: 700; margin-right: 5px; }
+            .print-highlight { font-weight: 700; color: #0f172a; }
+
+            .print-desc-list { list-style: none; margin: 4px 0 8px 0; padding-left: 5px; font-size: 12px; }
+            .print-desc-list li { position: relative; padding-left: 12px; margin-bottom: 3px; line-height: 1.45; }
+            .print-desc-list li::before { content: '■'; font-size: 8px; position: absolute; left: 0; top: 3px; color: #004098; }
+
+            .print-hotel-divider { border: 0; border-top: 1px dashed #94a3b8; margin: 8px 0 6px 0; }
+            .print-hotel-info { font-size: 12px; color: #0f172a; font-weight: 700; }
+
+            .print-meal-wrapper { display: flex; flex-direction: column; gap: 8px; justify-content: center; height: 100%; text-align: left; padding-left: 2px; }
+            .print-meal-simple { display: flex; align-items: flex-start; line-height: 1.35; font-size: 12px; }
+            .print-meal-simple strong { color: #004098; margin-right: 4px; width: 18px; flex-shrink: 0; }
+            .print-meal-menu { display: flex; flex-direction: column; word-break: keep-all; }
+            .print-meal-sub { font-size: 11px; margin-top: 2px; color: #475569; }
+
+            .print-remarks { font-size: 11px; color: #475569; text-align: right; font-weight: 500; margin-bottom: 10px; }
+
+            .print-footer-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-end; }
+            .print-brand-link { font-size: 11px; color: #6c757d; }
+            .print-manager-info { text-align: right; border-left: 3px solid #004098; padding-left: 10px; }
+            .print-manager-info .names { color: #0f172a; font-weight: 700; font-size: 12.5px; }
         }
     </style>
 </head>
-<body class="antialiased pb-20 md:pb-0">
+<body class="antialiased pb-20 md:pb-0 print:pb-0 print:bg-white">
 
     <!-- 메인 웹 래퍼 (인쇄 시 숨김) -->
     <div class="print:hidden">
@@ -653,106 +707,148 @@
     </footer>
     </div> <!-- 메인 웹 래퍼 종료 -->
 
-    <!-- 인쇄 전용 (A4) 레이아웃 시작: A4 용지에 표가 꽉 차도록 설계 -->
-    <div class="hidden print:block print-wrapper font-sans text-black">
-        <!-- Header -->
-        <div class="border-b-2 border-black pb-3 mb-4 text-center">
-            <h1 class="text-2xl font-bold mb-1 font-title tracking-wide">[황지정보산업고등학교] 제주 문화탐방 3박 4일 일정표</h1>
-            <p class="text-[13px] text-gray-600 font-medium">※ 본 일정표는 현지 사정에 따라 다소 변경될 수 있습니다.</p>
-            <p class="text-[12px] font-bold text-gray-800 mt-2 bg-gray-100 inline-block px-3 py-1 rounded-full">여행인원: 고등학생 39명 + 교사 6명 (총 45명) | 숙소: 신신호텔 월드컵점</p>
-        </div>
-        
-        <!-- Table -->
-        <table class="print-table">
-            <thead>
-                <tr>
-                    <th class="col-day">일자</th>
-                    <th class="col-desc">상세일정 및 체험내용</th>
-                    <th class="col-meal">식사</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Day 1 -->
-                <tr>
-                    <td class="col-day">1일차<br>9/8<br>(화)</td>
-                    <td class="col-desc">
-                        <ul class="space-y-1.5 text-left ml-1">
-                            <li class="bullet"><strong class="text-gray-900 hl text-[13px]">원주공항 집결:</strong> 탑승 수속 (★신분증 지참 필수)</li>
-                            <li class="bullet text-[13px]"><span class="font-bold">[항공]</span> 11:15 원주 출발 → 12:30 제주 도착 (진에어)</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">9.81 파크:</strong> 레이싱 2회 + 실내 서바이벌 액티비티</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">호텔 체크인 및 휴식:</strong> 신신호텔 월드컵점 투숙</li>
-                        </ul>
-                    </td>
-                    <td class="col-meal">
-                        조: -<br>중: 순풍고기국수<br>석: 호텔식
-                    </td>
-                </tr>
-                <!-- Day 2 -->
-                <tr>
-                    <td class="col-day">2일차<br>9/9<br>(수)</td>
-                    <td class="col-desc">
-                        <ul class="space-y-1.5 text-left ml-1">
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">함덕해변 & 서우봉:</strong> 에메랄드빛 바다와 해안 둘레길 산책</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">동쪽송당 동화마을:</strong> 대규모 감성 정원 포토존 관람</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">스누피가든:</strong> 피너츠 테마 정원·테마홀 포토존 관람</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">에코랜드:</strong> 곶자왈 관광궤도 열차 · 화산송이 산책로</li>
-                        </ul>
-                    </td>
-                    <td class="col-meal">
-                        조: 호텔식<br>중: 토종돼지<br>주물럭<br>석: 호텔식
-                    </td>
-                </tr>
-                <!-- Day 3 -->
-                <tr>
-                    <td class="col-day">3일차<br>9/10<br>(목)</td>
-                    <td class="col-desc">
-                        <ul class="space-y-1.5 text-left ml-1">
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">오설록 녹차밭 & 티뮤지엄:</strong> 푸른 녹차밭 관람 및 포토타임</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">산방랜드 (자유시간):</strong> 웅장한 산방산 아래 가벼운 어트랙션과 휴식 <span class="text-red-600 font-bold">(놀이기구 이용료 불포함)</span></li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">카멜리아힐:</strong> 동양 최대 규모 수목원 관람</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">천지연폭포 & 새섬:</strong> 폭포 감상 및 새연교 둘레길 산책</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">숙소 복귀 및 석식:</strong> 전 일정 종료 후 휴식</li>
-                        </ul>
-                    </td>
-                    <td class="col-meal">
-                        조: 호텔식<br>중: 법환플래터<br>(피자/파스타)<br>석: 호텔식
-                    </td>
-                </tr>
-                <!-- Day 4 -->
-                <tr>
-                    <td class="col-day">4일차<br>9/11<br>(금)</td>
-                    <td class="col-desc">
-                        <ul class="space-y-1.5 text-left ml-1">
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">노형수퍼마켙:</strong> 압도적 스케일의 화려한 미디어아트 전시 관람</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">이호테우 & 해안도로:</strong> 조랑말 등대와 알록달록 해안도로</li>
-                            <li class="bullet"><strong class="text-gray-900 hl text-[13px]">제주공항 수속:</strong> 탑승 수속 및 인원 파악</li>
-                            <li class="bullet text-[13px]"><span class="font-bold">[항공]</span> 15:20 제주 출발 → 16:35 원주 도착 (진에어)</li>
-                            <li class="bullet"><strong class="text-gray-900 text-[13px]">도착 및 해산:</strong> 버스 이동 후 안전하게 해산</li>
-                        </ul>
-                    </td>
-                    <td class="col-meal">
-                        조: 호텔식<br>중: 제육볶음<br>&고등어구이<br>석: -
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Check info -->
-        <div class="bg-gray-100 border border-gray-300 p-3 rounded-lg text-[13px] text-center mb-6">
-            <p class="font-bold text-[#004098] mb-1">■ 출발 전 필수 체크사항</p>
-            <p class="font-bold">1. 신분증(주민등록증, 여권, 학생증) 원본 절대 지참! (미지참 시 탑승 불가)</p>
-            <p>2. 평소 복용 약, 멀미약, 보조배터리, 우산/우비 개인 준비</p>
-        </div>
-
-        <!-- Footer -->
-        <div class="flex justify-between items-center pt-2 border-t border-gray-300">
-            <div class="flex items-center gap-2">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgHfgIX70O5k6Anuo0UgALIdaG9jSga9auHu3uyz0uEirylGPAJnjN_qQbvEGMUvPqUQf_g9FMNUHRxlDcUBf4vZ3Mpy4TnA9WxbmzWYK11gt2zuy_Irl4wctNFjcjLyPo0GPXV792o_J7L9guRMuDfeC1gy7USwywjYbECZgzcsHybuGRRAXAnO1eNmP8/s320/logo.png" style="height: 18px;" alt="Logo">
+    <!-- 인쇄 전용 (투어메이커 표준 A4 일정표) -->
+    <div id="print-area" class="hidden print:block w-full bg-white text-black py-2">
+        <div class="print-page-container">
+            <div class="print-header">
+                <div class="logo">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgHfgIX70O5k6Anuo0UgALIdaG9jSga9auHu3uyz0uEirylGPAJnjN_qQbvEGMUvPqUQf_g9FMNUHRxlDcUBf4vZ3Mpy4TnA9WxbmzWYK11gt2zuy_Irl4wctNFjcjLyPo0GPXV792o_J7L9guRMuDfeC1gy7USwywjYbECZgzcsHybuGRRAXAnO1eNmP8/s320/logo.png" alt="투어메이커 로고">
+                </div>
+                <div class="doc-info">문서번호: TM-260908-HJ</div>
             </div>
-            <span class="text-[11px] text-gray-500 font-medium">[System Powered by TOURMAKER]</span>
+
+            <div class="print-title-section">
+                <h1>[황지정보산업고등학교] 제주 3박 4일 문화탐방 일정표</h1>
+            </div>
+
+            <div class="print-overview-slim">
+                <div class="print-overview-item">
+                    <span class="label">행사기간</span>
+                    <span class="value"><span class="print-nowrap">2026. 09. 08 (화) ~ 09. 11 (금)</span></span>
+                </div>
+                <div class="print-overview-item">
+                    <span class="label">행사인원</span>
+                    <span class="value"><span class="print-nowrap">학생 39명 + 교사 6명 (총 45명)</span></span>
+                </div>
+                <div class="print-overview-item">
+                    <span class="label">이용항공</span>
+                    <span class="value"><span class="print-nowrap">진에어 (원주 ↔ 제주)</span></span>
+                </div>
+            </div>
+
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th class="print-col-date">일자</th>
+                        <th class="print-col-desc">상세일정 및 체험내용</th>
+                        <th class="print-col-meal">식사</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="print-day-divider">
+                        <td class="print-col-date"><strong class="print-nowrap">1일차</strong><br><span class="print-nowrap">9/8 (화)</span></td>
+                        <td class="print-col-desc">
+                            <div class="print-time-flow"><span class="print-time-tag">11:15</span> 원주공항 출발 (진에어) <span class="print-highlight">★신분증 원본 지참 필수</span></div>
+                            <div class="print-time-flow"><span class="print-time-tag">12:30</span> 제주공항 도착 및 전용버스 미팅</div>
+                            <ul class="print-desc-list">
+                                <li>[전용차량] 제주 시내 이동 후 중식</li>
+                                <li>무동력 레이싱의 짜릿함 <span class="print-highlight">9.81파크</span> (레이싱 2회 + 서바이벌 1회)</li>
+                                <li>일정 종료 후 호텔 투숙 및 휴식</li>
+                            </ul>
+                            <hr class="print-hotel-divider">
+                            <div class="print-hotel-info">🏨 호텔명 : 신신호텔 월드컵점</div>
+                        </td>
+                        <td class="print-col-meal">
+                            <div class="print-meal-wrapper">
+                                <div class="print-meal-simple"><strong>조:</strong><div class="print-meal-menu">-</div></div>
+                                <div class="print-meal-simple"><strong>중:</strong><div class="print-meal-menu">순풍고기국수</div></div>
+                                <div class="print-meal-simple"><strong>석:</strong><div class="print-meal-menu">호텔식</div></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr class="print-day-divider">
+                        <td class="print-col-date"><strong class="print-nowrap">2일차</strong><br><span class="print-nowrap">9/9 (수)</span></td>
+                        <td class="print-col-desc">
+                            <div class="print-time-flow"><span class="print-time-tag">전일</span> 호텔 조식 후 출발</div>
+                            <ul class="print-desc-list">
+                                <li>에메랄드빛 바다와 해안 둘레길 <span class="print-highlight">함덕해변 서우봉</span></li>
+                                <li>대규모 감성 정원 포토존 <span class="print-highlight">동쪽송당 동화마을</span></li>
+                                <li>피너츠 캐릭터와 함께하는 <span class="print-highlight">스누피가든</span></li>
+                                <li>곶자왈 관광궤도 열차 · 화산송이 산책로 <span class="print-highlight">에코랜드</span></li>
+                                <li>숙소 복귀 후 석식 및 휴식</li>
+                            </ul>
+                            <hr class="print-hotel-divider">
+                            <div class="print-hotel-info">🏨 호텔명 : 신신호텔 월드컵점</div>
+                        </td>
+                        <td class="print-col-meal">
+                            <div class="print-meal-wrapper">
+                                <div class="print-meal-simple"><strong>조:</strong><div class="print-meal-menu">호텔식</div></div>
+                                <div class="print-meal-simple"><strong>중:</strong><div class="print-meal-menu">토종돼지주물럭</div></div>
+                                <div class="print-meal-simple"><strong>석:</strong><div class="print-meal-menu">호텔식</div></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr class="print-day-divider">
+                        <td class="print-col-date"><strong class="print-nowrap">3일차</strong><br><span class="print-nowrap">9/10 (목)</span></td>
+                        <td class="print-col-desc">
+                            <div class="print-time-flow"><span class="print-time-tag">전일</span> 호텔 조식 후 출발</div>
+                            <ul class="print-desc-list">
+                                <li>푸른 녹차밭 관람 및 포토타임 <span class="print-highlight">오설록 티뮤지엄</span></li>
+                                <li>산방산 아래 가벼운 어트랙션 <span class="print-highlight">산방랜드</span> (자유시간 · 놀이기구 이용료 불포함)</li>
+                                <li>동양 최대 규모 수목원 <span class="print-highlight">카멜리아힐</span></li>
+                                <li>폭포 감상 및 새연교 둘레길 <span class="print-highlight">천지연폭포 &amp; 새섬</span></li>
+                                <li>숙소 복귀 후 석식 및 휴식</li>
+                            </ul>
+                            <hr class="print-hotel-divider">
+                            <div class="print-hotel-info">🏨 호텔명 : 신신호텔 월드컵점</div>
+                        </td>
+                        <td class="print-col-meal">
+                            <div class="print-meal-wrapper">
+                                <div class="print-meal-simple"><strong>조:</strong><div class="print-meal-menu">호텔식</div></div>
+                                <div class="print-meal-simple"><strong>중:</strong><div class="print-meal-menu">법환플래터<span class="print-meal-sub">(피자/파스타)</span></div></div>
+                                <div class="print-meal-simple"><strong>석:</strong><div class="print-meal-menu">호텔식</div></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr class="print-day-divider">
+                        <td class="print-col-date"><strong class="print-nowrap">4일차</strong><br><span class="print-nowrap">9/11 (금)</span></td>
+                        <td class="print-col-desc">
+                            <div class="print-time-flow"><span class="print-time-tag">오전</span> 호텔 조식 후 체크아웃</div>
+                            <ul class="print-desc-list">
+                                <li>흑백에서 컬러로 빠져드는 미디어아트 <span class="print-highlight">노형수퍼마켙</span></li>
+                                <li>조랑말 등대와 알록달록 방호벽 <span class="print-highlight">이호테우 &amp; 무지개해안도로</span></li>
+                                <li>제주공항 이동 후 탑승 수속 (신분증 원본 필수)</li>
+                            </ul>
+                            <div class="print-time-flow" style="margin-top: 8px;"><span class="print-time-tag">15:20</span> 제주공항 출발 (진에어)</div>
+                            <div class="print-time-flow"><span class="print-time-tag">16:35</span> 원주공항 도착 후 해산</div>
+                        </td>
+                        <td class="print-col-meal">
+                            <div class="print-meal-wrapper">
+                                <div class="print-meal-simple"><strong>조:</strong><div class="print-meal-menu">호텔식</div></div>
+                                <div class="print-meal-simple"><strong>중:</strong><div class="print-meal-menu">제육볶음<span class="print-meal-sub">+고등어구이</span></div></div>
+                                <div class="print-meal-simple"><strong>석:</strong><div class="print-meal-menu">-</div></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="print-remarks">
+                ※ 상기 일정은 항공기 연발착 및 현지 사정에 따라 다소 변경될 수 있습니다.<br>
+                ※ 국내선 탑승 시 신분증(주민등록증, 여권, 학생증) 원본 지참 필수 · 미지참 시 탑승 불가
+            </div>
+
+            <div class="print-footer-box">
+                <div class="print-brand-link">[System Powered by TOURMAKER]</div>
+                <div class="print-manager-info">
+                    <div class="names">담당자 : 이재명 010-9443-7881, 조혁 010-4249-4026</div>
+                </div>
+            </div>
         </div>
     </div>
-    <!-- 인쇄 전용 레이아웃 종료 -->
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
