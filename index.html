@@ -24,8 +24,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet CSS (Map) -->
+    <!-- Leaflet + OpenFreeMap (고한중과 동일한 밝은 지도, 키 없음) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Jua&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
@@ -39,7 +40,8 @@
             background-size: cover; background-position: center; background-attachment: fixed;
         }
         @media (max-width: 768px){ .hero-bg { background-attachment: scroll; } }
-        #map { height: 500px; width: 100%; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        #map { height: 500px; width: 100%; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 10; }
+        .leaflet-maplibre-gl { z-index: 0 !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -317,17 +319,19 @@
     <section id="map-section" class="py-12 bg-slate-50 border-t border-slate-200">
         <div class="container mx-auto px-4">
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-slate-800 tracking-tight font-title">한눈에 보는 동선 지도</h2>
-                <p class="text-slate-500 mt-2 text-sm">3박 4일 동안 우리가 이동할 핵심 스팟을 확인해보세요.</p>
+                <span class="text-indigo-600 font-black tracking-widest text-xs uppercase">ANIMATED ROUTING MAP</span>
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight font-title mt-2">한눈에 보는 동선 지도</h2>
+                <p class="text-slate-500 mt-2 text-sm md:text-base">일자별 버튼을 클릭하시면 <strong>세부 이동 경로가 애니메이션으로 직관적으로 표시</strong>됩니다.</p>
+                <p id="map-status-text" class="text-slate-400 mt-1 text-xs">전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 경로입니다</p>
             </div>
 
             <!-- Map Day Filter Buttons -->
             <div class="flex flex-wrap justify-center gap-2 mb-6">
-                <button onclick="filterMap('all')" id="btn-map-all" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-slate-800 text-white shadow-sm transition-colors">전체 일정</button>
-                <button onclick="filterMap('day1')" id="btn-map-day1" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">1일차</button>
-                <button onclick="filterMap('day2')" id="btn-map-day2" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">2일차</button>
-                <button onclick="filterMap('day3')" id="btn-map-day3" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">3일차</button>
-                <button onclick="filterMap('day4')" id="btn-map-day4" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">4일차</button>
+                <button onclick="filterMap('all')" id="btn-map-all" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-slate-800 text-white shadow-sm transition-colors">전체 여정</button>
+                <button onclick="filterMap('day1')" id="btn-map-day1" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">1일차(9.81파크)</button>
+                <button onclick="filterMap('day2')" id="btn-map-day2" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">2일차(동쪽)</button>
+                <button onclick="filterMap('day3')" id="btn-map-day3" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">3일차(서귀포)</button>
+                <button onclick="filterMap('day4')" id="btn-map-day4" class="map-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 shadow-sm transition-colors">4일차(아르떼)</button>
             </div>
 
             <div class="max-w-5xl mx-auto border border-slate-200 rounded-2xl p-1 shadow-lg bg-white relative z-0">
@@ -846,6 +850,8 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
     <script>
         // 토스트 알림 함수
         function showToast(message) {
@@ -1048,96 +1054,126 @@
             evt.currentTarget.classList.remove('bg-white','text-slate-500','border-slate-200');
         }
 
-        // Map Logic (애니메이션 5원칙 적용)
+        // Map Logic — 고한중과 동일한 OpenFreeMap + 일자 클릭 시 동선 재재생
         let mapInited = false;
-        let dayLayers = {};
         let currentMap = null;
-        let allSpots = {};
+        let mapLayers = [];
+        const mapHints = {
+            all: '전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 경로입니다',
+            day1: '1일차 동선 — 제주공항 → 9.81파크 → 신신호텔',
+            day2: '2일차 동선 — 호텔 → 함덕해변 → 동화마을 → 스누피가든 → 에코랜드',
+            day3: '3일차 동선 — 호텔 → 오설록 → 산방랜드 → 법환플래터 → 카멜리아힐',
+            day4: '4일차 동선 — 호텔 → 아르떼 뮤지엄 → 제주공항'
+        };
+        const spots = {
+            jejuAirport: { coords: [33.5104, 126.4913], title: '제주공항', color: '#1e293b', icon: '✈️' },
+            park981: { coords: [33.3642, 126.3456], title: '9.81 파크', color: '#ef4444', icon: '🏎️' },
+            hotel: { coords: [33.2505, 126.5085], title: '신신호텔', color: '#14b8a6', icon: '🏨' },
+            hamdeok: { coords: [33.5434, 126.6698], title: '함덕해변', color: '#3b82f6', icon: '🌊' },
+            songdang: { coords: [33.4447, 126.7877], title: '동화마을', color: '#22c55e', icon: '🌳' },
+            snoopy: { coords: [33.4544, 126.7725], title: '스누피가든', color: '#f59e0b', icon: '🐶' },
+            ecoland: { coords: [33.4560, 126.6678], title: '에코랜드', color: '#ef4444', icon: '🚂' },
+            osulloc: { coords: [33.3059, 126.2895], title: '오설록', color: '#22c55e', icon: '🍵' },
+            sanbang: { coords: [33.2384, 126.3115], title: '산방랜드', color: '#ef4444', icon: '🎡' },
+            beophwan: { coords: [33.2372, 126.5165], title: '법환플래터', color: '#f97316', icon: '🍕' },
+            camellia: { coords: [33.2897, 126.3533], title: '카멜리아힐', color: '#ec4899', icon: '🌺' },
+            arte: { coords: [33.4628, 126.3092], title: '아르떼 뮤지엄', color: '#8b5cf6', icon: '🎨' }
+        };
+        const routes = {
+            all: {
+                points: ['jejuAirport', 'park981', 'hotel', 'hamdeok', 'songdang', 'snoopy', 'ecoland', 'osulloc', 'sanbang', 'beophwan', 'camellia', 'arte'],
+                lines: [
+                    { latlngs: [spots.jejuAirport.coords, spots.park981.coords, spots.hotel.coords], color: '#f97316' },
+                    { latlngs: [spots.hotel.coords, spots.hamdeok.coords, spots.songdang.coords, spots.snoopy.coords, spots.ecoland.coords, spots.hotel.coords], color: '#3b82f6' },
+                    { latlngs: [spots.hotel.coords, spots.osulloc.coords, spots.sanbang.coords, spots.beophwan.coords, spots.camellia.coords, spots.hotel.coords], color: '#22c55e' },
+                    { latlngs: [spots.hotel.coords, spots.arte.coords, spots.jejuAirport.coords], color: '#6366f1' }
+                ]
+            },
+            day1: {
+                points: ['jejuAirport', 'park981', 'hotel'],
+                lines: [{ latlngs: [spots.jejuAirport.coords, spots.park981.coords, spots.hotel.coords], color: '#f97316' }]
+            },
+            day2: {
+                points: ['hotel', 'hamdeok', 'songdang', 'snoopy', 'ecoland'],
+                lines: [{ latlngs: [spots.hotel.coords, spots.hamdeok.coords, spots.songdang.coords, spots.snoopy.coords, spots.ecoland.coords, spots.hotel.coords], color: '#3b82f6' }]
+            },
+            day3: {
+                points: ['hotel', 'osulloc', 'sanbang', 'beophwan', 'camellia'],
+                lines: [{ latlngs: [spots.hotel.coords, spots.osulloc.coords, spots.sanbang.coords, spots.beophwan.coords, spots.camellia.coords, spots.hotel.coords], color: '#22c55e' }]
+            },
+            day4: {
+                points: ['hotel', 'arte', 'jejuAirport'],
+                lines: [{ latlngs: [spots.hotel.coords, spots.arte.coords, spots.jejuAirport.coords], color: '#6366f1' }]
+            }
+        };
+
+        function setMapStatus(text) {
+            const el = document.getElementById('map-status-text');
+            if (el) el.textContent = text;
+        }
+
+        function animateLine(polyline) {
+            setTimeout(() => {
+                const path = polyline.getElement();
+                if (!path) return;
+                const length = path.getTotalLength();
+                path.style.transition = 'none';
+                path.style.strokeDasharray = length + ' ' + length;
+                path.style.strokeDashoffset = length;
+                path.getBoundingClientRect();
+                path.style.transition = 'stroke-dashoffset 1.2s ease-in-out';
+                path.style.strokeDashoffset = '0';
+            }, 50);
+        }
+
+        function drawMap(routeKey) {
+            if (!currentMap) return;
+            mapLayers.forEach(layer => currentMap.removeLayer(layer));
+            mapLayers = [];
+            const routeData = routes[routeKey];
+            setMapStatus(mapHints[routeKey] || '');
+
+            routeData.lines.forEach((lineDef) => {
+                const polyline = L.polyline(lineDef.latlngs, { color: lineDef.color, weight: 4, opacity: 0.85 }).addTo(currentMap);
+                animateLine(polyline);
+                mapLayers.push(polyline);
+            });
+
+            let currentBounds = L.latLngBounds();
+            routeData.points.forEach(key => {
+                const spot = spots[key];
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="background-color:${spot.color}; width:32px; height:32px; border-radius:50%; border:2px solid white; color:white; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 4px rgba(0,0,0,0.3);">${spot.icon}</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+                const marker = L.marker(spot.coords, { icon }).addTo(currentMap).bindTooltip(spot.title, { direction: 'top', offset: [0, -16] });
+                mapLayers.push(marker);
+                currentBounds.extend(spot.coords);
+            });
+            currentMap.fitBounds(currentBounds, { padding: [50, 50], maxZoom: 12 });
+        }
 
         function initMap(){
             if(mapInited || !window.L) return;
             mapInited = true;
-            
-            // 제주도 주요 스팟 좌표
-            const spots = {
-                jejuAirport: [33.5104, 126.4913],
-                park981: [33.3642, 126.3456],
-                hotel: [33.2505, 126.5085],      // 신신호텔 월드컵점
-                hamdeok: [33.5434, 126.6698],
-                songdang: [33.4447, 126.7877],
-                snoopy: [33.4544, 126.7725],   // 스누피가든
-                ecoland: [33.4560, 126.6678],
-                osulloc: [33.3059, 126.2895],
-                sanbang: [33.2384, 126.3115],    // 산방산 랜드 주변
-                beophwan: [33.2372, 126.5165],   // 법환
-                camellia: [33.2897, 126.3533],
-                arte: [33.4628, 126.3092]      // 아르떼 뮤지엄 (애월)
-            };
-            allSpots = spots;
-
             currentMap = L.map('map', { scrollWheelZoom:false });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap', maxZoom: 15
-            }).addTo(currentMap);
-
-            // 마커 애니메이션 원칙 (JS조작금지, CSS 애니메이션 적용)
-            const createMarkerObj = (latlng, title, color, emoji, idx) => {
-                const icon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div style="animation: popIn 0.5s forwards; animation-delay: ${idx*0.2}s; background-color:${color}; width:32px; height:32px; border-radius:50%; border:2px solid white; color:white; display:flex; align-items:center; justify-content:center; font-size:16px; opacity:0; transform:scale(0); box-shadow:0 2px 4px rgba(0,0,0,0.3);">${emoji}</div>`,
-                    iconSize: [32, 32], iconAnchor: [16, 32]
-                });
-                return L.marker(latlng, {icon: icon}).bindTooltip(title, {direction: 'top', offset: [0, -32]});
-            };
-
-            const mk = {
-                a: createMarkerObj(spots.jejuAirport, '제주공항', '#1e293b', '✈️', 0),
-                p: createMarkerObj(spots.park981, '9.81 파크', '#ef4444', '🏎️', 1),
-                h: createMarkerObj(spots.hotel, '신신호텔', '#14b8a6', '🏨', 2),
-                hd: createMarkerObj(spots.hamdeok, '함덕해변', '#3b82f6', '🌊', 1),
-                sd: createMarkerObj(spots.songdang, '동화마을', '#22c55e', '🌳', 2),
-                sg: createMarkerObj(spots.snoopy, '스누피가든', '#f59e0b', '🐶', 3),
-                ec: createMarkerObj(spots.ecoland, '에코랜드', '#ef4444', '🚂', 4),
-                os: createMarkerObj(spots.osulloc, '오설록', '#22c55e', '🍵', 1),
-                sb: createMarkerObj(spots.sanbang, '산방랜드', '#ef4444', '🎡', 2),
-                bp: createMarkerObj(spots.beophwan, '법환플래터', '#f97316', '🍕', 3),
-                cm: createMarkerObj(spots.camellia, '카멜리아힐', '#ec4899', '🌺', 4),
-                ar: createMarkerObj(spots.arte, '아르떼 뮤지엄', '#8b5cf6', '🎨', 1)
-            };
-
-            // 선 애니메이션 처리를 위한 커스텀 함수 (원칙 3)
-            function createAnimatedLine(latlngs, color) {
-                const line = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8 });
-                line.on('add', function() {
-                    setTimeout(() => {
-                        const el = line._path;
-                        if(el) {
-                            const len = el.getTotalLength();
-                            el.style.strokeDasharray = len;
-                            el.style.strokeDashoffset = len;
-                            el.getBoundingClientRect(); // 강제 리플로우
-                            el.style.transition = 'stroke-dashoffset 2s ease-in-out';
-                            el.style.strokeDashoffset = '0';
-                        }
-                    }, 300); // 맵 렌더링 후 대기
-                });
-                return line;
+            // 예전 Carto Voyager와 같은 계열(밝은·단순한 스타일). 키 없음.
+            if (typeof L.maplibreGL === 'function') {
+                L.maplibreGL({
+                    style: 'https://tiles.openfreemap.org/styles/positron'
+                }).addTo(currentMap);
+            } else {
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: 'Tiles &copy; Esri'
+                }).addTo(currentMap);
             }
-
-            dayLayers = {
-                day1: L.layerGroup([mk.a, mk.p, mk.h, createAnimatedLine([spots.jejuAirport, spots.park981, spots.hotel], '#f97316')]),
-                day2: L.layerGroup([mk.h, mk.hd, mk.sd, mk.sg, mk.ec, createAnimatedLine([spots.hotel, spots.hamdeok, spots.songdang, spots.snoopy, spots.ecoland, spots.hotel], '#3b82f6')]),
-                day3: L.layerGroup([mk.h, mk.os, mk.sb, mk.bp, mk.cm, createAnimatedLine([spots.hotel, spots.osulloc, spots.sanbang, spots.beophwan, spots.camellia, spots.hotel], '#22c55e')]),
-                day4: L.layerGroup([mk.h, mk.ar, mk.a, createAnimatedLine([spots.hotel, spots.arte, spots.jejuAirport], '#6366f1')])
-            };
-
-            filterMap('all');
+            drawMap('all');
         }
 
         window.filterMap = function(day) {
-            if(!currentMap) return;
-
-            // UI 탭 변경
             document.querySelectorAll('.map-btn').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'text-white');
                 btn.classList.add('bg-white', 'text-slate-600');
@@ -1147,24 +1183,12 @@
                 targetBtn.classList.remove('bg-white', 'text-slate-600');
                 targetBtn.classList.add('bg-slate-800', 'text-white');
             }
-
-            // 레이어 초기화 (원칙 4)
-            Object.values(dayLayers).forEach(layer => currentMap.removeLayer(layer));
-
-            if (day === 'all') {
-                Object.values(dayLayers).forEach(layer => layer.addTo(currentMap));
-                currentMap.fitBounds(L.latLngBounds(Object.values(allSpots)), { padding: [30, 30] });
-            } else {
-                dayLayers[day].addTo(currentMap);
-                let daySpots = [];
-                if(day === 'day1') daySpots = [allSpots.jejuAirport, allSpots.park981, allSpots.hotel];
-                if(day === 'day2') daySpots = [allSpots.hotel, allSpots.hamdeok, allSpots.songdang, allSpots.snoopy, allSpots.ecoland];
-                if(day === 'day3') daySpots = [allSpots.hotel, allSpots.osulloc, allSpots.sanbang, allSpots.beophwan, allSpots.camellia];
-                if(day === 'day4') daySpots = [allSpots.hotel, allSpots.arte, allSpots.jejuAirport];
-                
-                // 원칙 2: fitBounds 
-                currentMap.fitBounds(L.latLngBounds(daySpots), { padding: [50, 50] });
+            if (!currentMap) {
+                initMap();
+                if (day !== 'all') drawMap(day);
+                return;
             }
+            drawMap(day);
         };
 
         const io = new IntersectionObserver((entries)=>{
