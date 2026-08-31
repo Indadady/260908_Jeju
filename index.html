@@ -42,6 +42,34 @@
         @media (max-width: 768px){ .hero-bg { background-attachment: scroll; } }
         #map { height: 500px; width: 100%; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 10; }
         .leaflet-maplibre-gl { z-index: 0 !important; }
+        .custom-icon { background: transparent; border: none; }
+        .map-pin-wrap { display: flex; flex-direction: column; align-items: center; }
+        .map-pin-dot {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: #fff;
+            border: 2px solid rgba(255,255,255,0.95);
+            box-shadow: 0 8px 16px rgba(15,23,42,0.18);
+        }
+        .map-pin-label {
+            margin-top: 3px;
+            background: rgba(255,255,255,0.96);
+            color: #0f172a;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1.2;
+            padding: 2px 6px;
+            border-radius: 6px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.12);
+        }
+        .map-bus {
+            font-size: 22px;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(15,23,42,0.35));
+        }
+        @media (max-width: 768px) { #map { height: 440px; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -321,8 +349,8 @@
             <div class="text-center mb-8">
                 <span class="text-indigo-600 font-black tracking-widest text-xs uppercase">ANIMATED ROUTING MAP</span>
                 <h2 class="text-3xl font-bold text-slate-800 tracking-tight font-title mt-2">한눈에 보는 동선 지도</h2>
-                <p class="text-slate-500 mt-2 text-sm md:text-base">일자별 버튼을 클릭하시면 <strong>세부 이동 경로가 애니메이션으로 직관적으로 표시</strong>됩니다.</p>
-                <p id="map-status-text" class="text-slate-400 mt-1 text-xs">전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 경로입니다</p>
+                <p class="text-slate-500 mt-2 text-sm md:text-base">실제 도로를 따라 이동 순서가 천천히 그려집니다. 일자 버튼을 누르면 해당 구간만 볼 수 있습니다.</p>
+                <p id="map-hint" class="text-slate-400 mt-1 text-xs">전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 실제 도로 동선</p>
             </div>
 
             <!-- Map Day Filter Buttons -->
@@ -336,6 +364,9 @@
 
             <div class="max-w-5xl mx-auto border border-slate-200 rounded-2xl p-1 shadow-lg bg-white relative z-0">
                 <div id="map"></div>
+                <div id="map-status" class="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl shadow font-bold text-xs text-slate-700 pointer-events-none">
+                    <i class="fa-solid fa-route text-indigo-500 mr-1"></i><span id="map-status-text">실제 도로 동선</span>
+                </div>
             </div>
         </div>
     </section>
@@ -1054,12 +1085,15 @@
             evt.currentTarget.classList.remove('bg-white','text-slate-500','border-slate-200');
         }
 
-        // Map Logic — 고한중과 동일한 OpenFreeMap + 일자 클릭 시 동선 재재생
+        // Map Logic — OSRM 실제 도로 + 모바일에서 순차·천천히 재생
         let mapInited = false;
         let currentMap = null;
         let mapLayers = [];
+        let mapDrawSeq = 0;
+        let activeBus = null;
+        const osrmCache = {};
         const mapHints = {
-            all: '전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 경로입니다',
+            all: '전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 실제 도로 동선',
             day1: '1일차 동선 — 제주공항 → 9.81파크 → 신신호텔',
             day2: '2일차 동선 — 호텔 → 함덕해변 → 동화마을 → 스누피가든 → 에코랜드',
             day3: '3일차 동선 — 호텔 → 오설록 → 산방랜드 → 법환플래터 → 카멜리아힐',
@@ -1082,84 +1116,228 @@
         const routes = {
             all: {
                 points: ['jejuAirport', 'park981', 'hotel', 'hamdeok', 'songdang', 'snoopy', 'ecoland', 'osulloc', 'sanbang', 'beophwan', 'camellia', 'arte'],
+                maxZoom: 10,
                 lines: [
-                    { latlngs: [spots.jejuAirport.coords, spots.park981.coords, spots.hotel.coords], color: '#f97316' },
-                    { latlngs: [spots.hotel.coords, spots.hamdeok.coords, spots.songdang.coords, spots.snoopy.coords, spots.ecoland.coords, spots.hotel.coords], color: '#3b82f6' },
-                    { latlngs: [spots.hotel.coords, spots.osulloc.coords, spots.sanbang.coords, spots.beophwan.coords, spots.camellia.coords, spots.hotel.coords], color: '#22c55e' },
-                    { latlngs: [spots.hotel.coords, spots.arte.coords, spots.jejuAirport.coords], color: '#6366f1' }
+                    { pts: ['jejuAirport', 'park981', 'hotel'], color: '#f97316' },
+                    { pts: ['hotel', 'hamdeok', 'songdang', 'snoopy', 'ecoland', 'hotel'], color: '#3b82f6' },
+                    { pts: ['hotel', 'osulloc', 'sanbang', 'beophwan', 'camellia', 'hotel'], color: '#22c55e' },
+                    { pts: ['hotel', 'arte', 'jejuAirport'], color: '#6366f1' }
                 ]
             },
             day1: {
                 points: ['jejuAirport', 'park981', 'hotel'],
-                lines: [{ latlngs: [spots.jejuAirport.coords, spots.park981.coords, spots.hotel.coords], color: '#f97316' }]
+                maxZoom: 11,
+                lines: [{ pts: ['jejuAirport', 'park981', 'hotel'], color: '#f97316' }]
             },
             day2: {
                 points: ['hotel', 'hamdeok', 'songdang', 'snoopy', 'ecoland'],
-                lines: [{ latlngs: [spots.hotel.coords, spots.hamdeok.coords, spots.songdang.coords, spots.snoopy.coords, spots.ecoland.coords, spots.hotel.coords], color: '#3b82f6' }]
+                maxZoom: 11,
+                lines: [{ pts: ['hotel', 'hamdeok', 'songdang', 'snoopy', 'ecoland', 'hotel'], color: '#3b82f6' }]
             },
             day3: {
                 points: ['hotel', 'osulloc', 'sanbang', 'beophwan', 'camellia'],
-                lines: [{ latlngs: [spots.hotel.coords, spots.osulloc.coords, spots.sanbang.coords, spots.beophwan.coords, spots.camellia.coords, spots.hotel.coords], color: '#22c55e' }]
+                maxZoom: 11,
+                lines: [{ pts: ['hotel', 'osulloc', 'sanbang', 'beophwan', 'camellia', 'hotel'], color: '#22c55e' }]
             },
             day4: {
                 points: ['hotel', 'arte', 'jejuAirport'],
-                lines: [{ latlngs: [spots.hotel.coords, spots.arte.coords, spots.jejuAirport.coords], color: '#6366f1' }]
+                maxZoom: 11,
+                lines: [{ pts: ['hotel', 'arte', 'jejuAirport'], color: '#6366f1' }]
             }
         };
 
+        function isMobileView() {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
         function setMapStatus(text) {
             const el = document.getElementById('map-status-text');
             if (el) el.textContent = text;
         }
-
-        function animateLine(polyline) {
-            setTimeout(() => {
-                const path = polyline.getElement();
-                if (!path) return;
+        function pinIcon(spot) {
+            return L.divIcon({
+                className: 'custom-icon',
+                html: `<div class="map-pin-wrap">
+                    <div class="map-pin-dot" style="background:${spot.color};">${spot.icon}</div>
+                    <span class="map-pin-label">${spot.title}</span>
+                </div>`,
+                iconSize: [96, 52],
+                iconAnchor: [48, 16]
+            });
+        }
+        function busIcon() {
+            return L.divIcon({
+                className: 'custom-icon',
+                html: '<div class="map-bus">🚌</div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+        }
+        function clearMapLayers() {
+            if (activeBus) activeBus._aborted = true;
+            activeBus = null;
+            mapLayers.forEach(layer => {
+                if (layer._aborted !== undefined) layer._aborted = true;
+                currentMap.removeLayer(layer);
+            });
+            mapLayers = [];
+        }
+        async function roadPath(pts) {
+            const key = pts.map(p => p.join(',')).join('|');
+            if (osrmCache[key]) return osrmCache[key];
+            try {
+                const coords = pts.map(p => `${p[1]},${p[0]}`).join(';');
+                const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+                const data = await res.json();
+                if (data.code === 'Ok' && data.routes && data.routes[0]) {
+                    const path = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+                    osrmCache[key] = path;
+                    return path;
+                }
+            } catch (e) { /* fall back to straight line */ }
+            return pts;
+        }
+        function lineDuration(pixelLength, routeKey) {
+            const mobile = isMobileView();
+            const allView = routeKey === 'all';
+            const min = mobile ? (allView ? 1600 : 2800) : (allView ? 900 : 1400);
+            const max = mobile ? (allView ? 2800 : 5600) : (allView ? 1800 : 2800);
+            const pxPerMs = mobile ? (allView ? 0.22 : 0.12) : 0.28;
+            return Math.max(min, Math.min(max, pixelLength / pxPerMs));
+        }
+        function whenPathReady(polyline) {
+            return new Promise(resolve => {
+                let tries = 24;
+                const tick = () => {
+                    const el = polyline.getElement();
+                    if (el && typeof el.getTotalLength === 'function') resolve(el);
+                    else if (tries-- > 0) requestAnimationFrame(tick);
+                    else resolve(null);
+                };
+                requestAnimationFrame(tick);
+            });
+        }
+        function animateLine(polyline, duration) {
+            return new Promise(async resolve => {
+                const path = await whenPathReady(polyline);
+                if (!path) { resolve(duration); return; }
                 const length = path.getTotalLength();
+                const ms = duration || 1400;
                 path.style.transition = 'none';
                 path.style.strokeDasharray = length + ' ' + length;
-                path.style.strokeDashoffset = length;
+                path.style.strokeDashoffset = String(length);
                 path.getBoundingClientRect();
-                path.style.transition = 'stroke-dashoffset 1.2s ease-in-out';
+                path.style.transition = `stroke-dashoffset ${ms}ms ease-in-out`;
                 path.style.strokeDashoffset = '0';
-            }, 50);
+                setTimeout(() => resolve(ms), ms + 40);
+            });
+        }
+        function moveMarkerAlong(marker, latlngs, duration) {
+            return new Promise(resolve => {
+                if (!marker || !latlngs || latlngs.length < 2) { resolve(); return; }
+                const dists = [0];
+                let total = 0;
+                for (let i = 1; i < latlngs.length; i++) {
+                    total += L.latLng(latlngs[i - 1]).distanceTo(L.latLng(latlngs[i]));
+                    dists.push(total);
+                }
+                if (total === 0) { resolve(); return; }
+                const start = performance.now();
+                const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                function frame(now) {
+                    if (marker._aborted) { resolve(); return; }
+                    const t = Math.min(1, (now - start) / duration);
+                    const target = total * ease(t);
+                    let i = 1;
+                    while (i < dists.length && dists[i] < target) i++;
+                    const a = latlngs[i - 1];
+                    const b = latlngs[Math.min(i, latlngs.length - 1)];
+                    const span = (dists[i] - dists[i - 1]) || 1;
+                    const f = (target - dists[i - 1]) / span;
+                    marker.setLatLng([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+                    if (t < 1) requestAnimationFrame(frame);
+                    else resolve();
+                }
+                requestAnimationFrame(frame);
+            });
         }
 
-        function drawMap(routeKey) {
+        async function drawMap(routeKey) {
             if (!currentMap) return;
-            mapLayers.forEach(layer => currentMap.removeLayer(layer));
-            mapLayers = [];
-            const routeData = routes[routeKey];
-            setMapStatus(mapHints[routeKey] || '');
+            const seq = ++mapDrawSeq;
+            clearMapLayers();
+            const routeData = routes[routeKey] || routes.all;
+            const hint = mapHints[routeKey] || '';
+            const hintEl = document.getElementById('map-hint');
+            if (hintEl) hintEl.textContent = hint;
+            setMapStatus('실제 도로 동선을 불러오는 중...');
 
-            routeData.lines.forEach((lineDef) => {
-                const polyline = L.polyline(lineDef.latlngs, { color: lineDef.color, weight: 4, opacity: 0.85 }).addTo(currentMap);
-                animateLine(polyline);
-                mapLayers.push(polyline);
+            const bounds = L.latLngBounds(routeData.points.map(key => spots[key].coords));
+            currentMap.fitBounds(bounds, { padding: [50, 50], maxZoom: routeData.maxZoom || 11 });
+            setTimeout(() => currentMap.invalidateSize(), 120);
+
+            const legs = [];
+            routeData.lines.forEach(lineDef => {
+                for (let i = 0; i < lineDef.pts.length - 1; i++) {
+                    legs.push({ from: lineDef.pts[i], to: lineDef.pts[i + 1], color: lineDef.color });
+                }
             });
+            const paths = await Promise.all(legs.map(leg => roadPath([spots[leg.from].coords, spots[leg.to].coords])));
+            if (seq !== mapDrawSeq) return;
 
-            let currentBounds = L.latLngBounds();
-            routeData.points.forEach(key => {
+            paths.forEach(path => path.forEach(pt => bounds.extend(pt)));
+            currentMap.fitBounds(bounds, { padding: [50, 50], maxZoom: routeData.maxZoom || 11 });
+            await new Promise(r => setTimeout(r, 280));
+            if (seq !== mapDrawSeq) return;
+
+            const ghost = L.polyline(paths.flat(), { color: '#94a3b8', weight: 4, opacity: 0.22, lineJoin: 'round', lineCap: 'round' }).addTo(currentMap);
+            mapLayers.push(ghost);
+
+            const placed = new Set();
+            const addPin = (key) => {
+                if (placed.has(key)) return;
+                placed.add(key);
                 const spot = spots[key];
-                const icon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div style="background-color:${spot.color}; width:32px; height:32px; border-radius:50%; border:2px solid white; color:white; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 4px rgba(0,0,0,0.3);">${spot.icon}</div>`,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 16]
-                });
-                const marker = L.marker(spot.coords, { icon }).addTo(currentMap).bindTooltip(spot.title, { direction: 'top', offset: [0, -16] });
+                const marker = L.marker(spot.coords, { icon: pinIcon(spot), zIndexOffset: 200 })
+                    .addTo(currentMap)
+                    .bindTooltip(spot.title, { direction: 'top', offset: [0, -16] });
                 mapLayers.push(marker);
-                currentBounds.extend(spot.coords);
-            });
-            currentMap.fitBounds(currentBounds, { padding: [50, 50], maxZoom: 12 });
+            };
+            addPin(legs[0].from);
+
+            const bus = L.marker(spots[legs[0].from].coords, { icon: busIcon(), zIndexOffset: 900 }).addTo(currentMap);
+            bus._aborted = false;
+            activeBus = bus;
+            mapLayers.push(bus);
+
+            for (let i = 0; i < legs.length; i++) {
+                if (seq !== mapDrawSeq) return;
+                const leg = legs[i];
+                const path = paths[i];
+                setMapStatus(`${spots[leg.from].title} → ${spots[leg.to].title}`);
+                const poly = L.polyline(path, { color: leg.color, weight: 5, opacity: 0.95, lineJoin: 'round', lineCap: 'round' }).addTo(currentMap);
+                mapLayers.push(poly);
+                const ready = await whenPathReady(poly);
+                const ms = lineDuration(ready ? ready.getTotalLength() : 400, routeKey);
+                await Promise.all([
+                    animateLine(poly, ms),
+                    moveMarkerAlong(bus, path, ms)
+                ]);
+                if (seq !== mapDrawSeq) return;
+                addPin(leg.to);
+                await new Promise(r => setTimeout(r, isMobileView() ? 280 : 140));
+            }
+            if (seq !== mapDrawSeq) return;
+            setMapStatus(hint);
+            if (bus && currentMap.hasLayer(bus)) currentMap.removeLayer(bus);
+            mapLayers = mapLayers.filter(layer => layer !== bus);
+            if (activeBus === bus) activeBus = null;
+            setTimeout(() => currentMap.invalidateSize(), 160);
         }
 
-        function initMap(){
-            if(mapInited || !window.L) return;
+        function initMap(initialKey) {
+            if (mapInited || !window.L) return;
             mapInited = true;
-            currentMap = L.map('map', { scrollWheelZoom:false });
-            // 예전 Carto Voyager와 같은 계열(밝은·단순한 스타일). 키 없음.
+            currentMap = L.map('map', { scrollWheelZoom: false });
             if (typeof L.maplibreGL === 'function') {
                 L.maplibreGL({
                     style: 'https://tiles.openfreemap.org/styles/positron'
@@ -1170,7 +1348,19 @@
                     attribution: 'Tiles &copy; Esri'
                 }).addTo(currentMap);
             }
-            drawMap('all');
+            const startKey = initialKey || (isMobileView() ? 'day1' : 'all');
+            if (isMobileView() && !initialKey) {
+                document.querySelectorAll('.map-btn').forEach(btn => {
+                    btn.classList.remove('bg-slate-800', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-600');
+                });
+                const day1 = document.getElementById('btn-map-day1');
+                if (day1) {
+                    day1.classList.remove('bg-white', 'text-slate-600');
+                    day1.classList.add('bg-slate-800', 'text-white');
+                }
+            }
+            drawMap(startKey);
         }
 
         window.filterMap = function(day) {
@@ -1179,23 +1369,22 @@
                 btn.classList.add('bg-white', 'text-slate-600');
             });
             const targetBtn = document.getElementById('btn-map-' + day);
-            if(targetBtn) {
+            if (targetBtn) {
                 targetBtn.classList.remove('bg-white', 'text-slate-600');
                 targetBtn.classList.add('bg-slate-800', 'text-white');
             }
             if (!currentMap) {
-                initMap();
-                if (day !== 'all') drawMap(day);
+                initMap(day);
                 return;
             }
             drawMap(day);
         };
 
-        const io = new IntersectionObserver((entries)=>{
-            if(entries[0].isIntersecting) { initMap(); io.disconnect(); }
+        const io = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) { initMap(); io.disconnect(); }
         }, { threshold: 0.1 });
         const mapSection = document.getElementById('map-section');
-        if(mapSection) io.observe(mapSection);
+        if (mapSection) io.observe(mapSection);
 
     </script>
 </body>
