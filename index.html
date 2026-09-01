@@ -304,7 +304,7 @@
                         <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2 font-title">
                             <i class="fa-solid fa-shield-halved text-indigo-500"></i> 탑승 수속 및 안전 수칙 (필독)
                         </h3>
-                        <span class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">집결: 원주공항</span>
+                        <span class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">집결: 학교 07:30</span>
                     </div>
                     
                     <div class="p-6 md:p-8">
@@ -319,7 +319,7 @@
                             <div class="bg-white rounded-xl p-4 border border-indigo-100 shadow-sm">
                                 <div class="mb-2"><i class="fa-solid fa-plane text-2xl text-indigo-500"></i></div>
                                 <h4 class="font-bold text-slate-800 text-sm">신속한 수속</h4>
-                                <p class="text-[11px] text-slate-500 mt-1">단체 수속이므로 공항 집결 시간을 반드시 엄수해 주세요.</p>
+                                <p class="text-[11px] text-slate-500 mt-1">9/8(화) <span class="text-indigo-600 font-bold">07:30 학교 집결</span> 후 원주공항으로 이동합니다. 단체 수속이므로 시간을 반드시 엄수해 주세요.</p>
                             </div>
                             <div class="bg-white rounded-xl p-4 border border-indigo-100 shadow-sm">
                                 <div class="mb-2"><i class="fa-solid fa-seatbelt text-2xl text-indigo-500"></i></div>
@@ -399,13 +399,18 @@
                             <span class="text-4xl bg-orange-100 p-3 rounded-2xl">🏎️</span>
                             <div>
                                 <h3 class="font-bold text-2xl text-slate-800 font-title">설레는 출발, 짜릿한 레이싱!</h3>
-                                <p class="text-orange-600 font-medium text-sm">원주공항 → 고기국수 → 9.81파크 → 호텔</p>
+                                <p class="text-orange-600 font-medium text-sm">학교(07:30) → 원주공항 → 고기국수 → 9.81파크 → 호텔</p>
                             </div>
                         </div>
                         <div class="space-y-6">
                             <div class="relative pl-8 border-l-2 border-orange-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-indigo-500"></div>
+                                <h4 class="font-bold text-lg">07:30 학교 집결 후 원주공항 이동</h4>
+                                <p class="text-slate-500 text-sm mt-1">황지정보산업고에서 인원 파악 후 원주공항으로 이동합니다. <span class="text-red-500 font-bold">시간 엄수 · 신분증 원본 지참</span></p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-orange-200">
                                 <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-orange-500"></div>
-                                <h4 class="font-bold text-lg">오전: 원주공항 도착 및 탑승수속</h4>
+                                <h4 class="font-bold text-lg">원주공항 도착 및 탑승수속</h4>
                                 <p class="text-slate-500 text-sm mt-1">인원 파악 및 국내선 탑승 수속 <span class="text-red-500 font-bold">(신분증 준비 필수!)</span></p>
                             </div>
                             <div class="relative pl-8 border-l-2 border-orange-200">
@@ -779,7 +784,8 @@
                     <tr class="print-day-divider">
                         <td class="print-col-date"><strong class="print-nowrap">1일차</strong><br><span class="print-nowrap">9/8 (화)</span></td>
                         <td class="print-col-desc">
-                            <div class="print-time-flow"><span class="print-time-tag">11:15</span> 원주공항 출발 (진에어) <span class="print-highlight">★신분증 원본 지참 필수</span></div>
+                            <div class="print-time-flow"><span class="print-time-tag">07:30</span> 학교 집결 후 원주공항 이동 <span class="print-highlight">★신분증 원본 지참 필수</span></div>
+                            <div class="print-time-flow"><span class="print-time-tag">11:15</span> 원주공항 출발 (진에어)</div>
                             <div class="print-time-flow"><span class="print-time-tag">12:30</span> 제주공항 도착 · 인원 파악 후 출발</div>
                             <ul class="print-desc-list">
                                 <li>중식 <span class="print-highlight">고기국수</span></li>
@@ -1094,7 +1100,7 @@
         const osrmCache = {};
         const mapHints = {
             all: '전체 일정 — 제주공항에서 시작해 다시 공항으로 돌아오는 실제 도로 동선',
-            day1: '1일차 동선 — 제주공항 → 9.81파크 → 신신호텔',
+            day1: '1일차 동선 — 07:30 학교 집결 후 원주공항 이동 · 제주공항 → 9.81파크 → 신신호텔',
             day2: '2일차 동선 — 호텔 → 함덕해변 → 동화마을 → 스누피가든 → 에코랜드',
             day3: '3일차 동선 — 호텔 → 오설록 → 산방랜드 → 법환플래터 → 카멜리아힐',
             day4: '4일차 동선 — 호텔 → 아르떼 뮤지엄 → 제주공항'
